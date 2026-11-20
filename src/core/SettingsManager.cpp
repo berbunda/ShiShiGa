@@ -17,7 +17,7 @@ constexpr int kDefaultMainWindowHeight = 900;
 constexpr int kUnsetWindowCoordinate = -1;
 
 constexpr char kOrganizationName[] = "ShiShiga";
-constexpr char kApplicationName[] = "ShiShiga Workspace";
+constexpr char kApplicationName[] = "ShiShiGa";
 
 constexpr char kGroupUi[] = "UI";
 constexpr char kGroupBehavior[] = "Behavior";
@@ -41,6 +41,18 @@ constexpr char kKeyUserAgentCustomWarningAcknowledged[] = "CustomModeWarningAckn
 
 QSettings makeSettings()
 {
+    QSettings legacy(QSettings::IniFormat, QSettings::UserScope,
+                     QString::fromLatin1(kOrganizationName), QStringLiteral("ShiShiga Workspace"));
+    QSettings current(QSettings::IniFormat, QSettings::UserScope,
+                      QString::fromLatin1(kOrganizationName), QString::fromLatin1(kApplicationName));
+    if (!current.contains(QStringLiteral("Migration/WorkspaceSettings"))) {
+        for (const auto &key : legacy.allKeys()) {
+            if (!current.contains(key))
+                current.setValue(key, legacy.value(key));
+        }
+        current.setValue(QStringLiteral("Migration/WorkspaceSettings"), true);
+        current.sync();
+    }
     return QSettings(QSettings::IniFormat,
                      QSettings::UserScope,
                      QString::fromLatin1(kOrganizationName),

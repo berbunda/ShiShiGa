@@ -42,6 +42,8 @@ public:
     QString profileRuntimeStateLabel(const QString &catalogServiceId) const;
     bool clearServiceProfile(const QString &catalogServiceId, QString *errorMessage = nullptr);
     void signInToService(const QString &catalogServiceId);
+    bool savePage(const ServiceCatalogEntry &page, QString *errorMessage = nullptr);
+    bool removePage(const QString &serviceId, QString *errorMessage = nullptr);
 
 public slots:
     bool openService(const QString &catalogServiceId);
@@ -50,6 +52,7 @@ public slots:
     void closeService(const QString &serviceId);
 
 signals:
+    void pagesChanged();
     void serviceAdded(const QString &serviceId);
     void serviceRemoved(const QString &serviceId);
     void serviceStateChanged(const QString &serviceId, ServiceState state);

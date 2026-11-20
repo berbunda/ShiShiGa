@@ -478,7 +478,7 @@ QString CrashLogger::buildCrashReport(const ErrorKind kind,
     QString report;
     QTextStream stream(&report);
 
-    stream << "=== ShiShiga Workspace Crash Log ===\n";
+    stream << "=== ShiShiGa Crash Log ===\n";
     stream << "Timestamp: " << timestamp.toString(Qt::ISODateWithMs) << "\n";
     stream << "Application Version: " << applicationVersion() << "\n";
     stream << "OS Version: " << operatingSystemDescription() << "\n";

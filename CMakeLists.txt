@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(ShiShiGa-Workspace VERSION 0.6.2)
+# Cargo.toml is the shared version manifest; this remains a C++/CMake project.
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/Cargo.toml" SHISHIGA_VERSION_LINE
+    REGEX "^version = ")
+string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+" SHISHIGA_VERSION "${SHISHIGA_VERSION_LINE}")
+if(NOT SHISHIGA_VERSION)
+    message(FATAL_ERROR "Cargo.toml must specify a version in x.y.z-b form")
+endif()
+string(REGEX REPLACE "-[0-9]+$" "" SHISHIGA_BASE_VERSION "${SHISHIGA_VERSION}")
+project(ShiShiGa VERSION ${SHISHIGA_BASE_VERSION})
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS Cargo.toml)
 
 include(cmake/AppVersion.cmake)
 
@@ -13,7 +22,7 @@ qt_standard_project_setup()
 
 set_source_files_properties(resources/qt.conf PROPERTIES QT_RESOURCE_ALIAS "qt.conf")
 
-add_executable(ShiShiGa-Workspace WIN32
+add_executable(ShiShiGa WIN32
     main.cpp
     src/core/AppIcons.cpp
     src/core/AppIcons.h
@@ -68,19 +77,21 @@ add_executable(ShiShiGa-Workspace WIN32
     src/ui/ProfileManagerWidget.h
     src/ui/ServiceButton.cpp
     src/ui/ServiceButton.h
+    src/ui/ServicePagesDialog.cpp
+    src/ui/ServicePagesDialog.h
     src/ui/ServiceSidebar.cpp
     src/ui/ServiceSidebar.h
     src/ui/SidebarAddButton.cpp
     src/ui/SidebarAddButton.h
 )
 
-qt_add_resources(ShiShiGa-Workspace "embedded_qt_conf"
+qt_add_resources(ShiShiGa "embedded_qt_conf"
     PREFIX "/qt/etc"
     FILES
         resources/qt.conf
 )
 
-qt_add_resources(ShiShiGa-Workspace "embedded_license"
+qt_add_resources(ShiShiGa "embedded_license"
     PREFIX "/"
     FILES
         LICENSE
@@ -94,7 +105,7 @@ set_source_files_properties("${SHISHIGA_ICON_DIR}/ShiShiGa-tray-48.png"
 set_source_files_properties("${SHISHIGA_ICON_DIR}/ShiShiGa-tray-16.png"
     PROPERTIES QT_RESOURCE_ALIAS "ShiShiGa-tray-16.png")
 
-qt_add_resources(ShiShiGa-Workspace "embedded_app_icons"
+qt_add_resources(ShiShiGa "embedded_app_icons"
     PREFIX "/icons"
     FILES
         "${SHISHIGA_ICON_DIR}/ShiShiGa-128.png"
@@ -104,37 +115,57 @@ qt_add_resources(ShiShiGa-Workspace "embedded_app_icons"
 
 if(WIN32)
     set(SHISHIGA_EXE_ICON "${CMAKE_SOURCE_DIR}/resources/icons/ShiShiGa.ico")
-    target_sources(ShiShiGa-Workspace PRIVATE resources/windows/app.rc)
+    target_sources(ShiShiGa PRIVATE resources/windows/app.rc)
     set_source_files_properties(resources/windows/app.rc PROPERTIES
         OBJECT_DEPENDS "${SHISHIGA_EXE_ICON}")
 endif()
 
-add_custom_command(TARGET ShiShiGa-Workspace POST_BUILD
+add_custom_command(TARGET ShiShiGa POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/LICENSE"
-        "$<TARGET_FILE_DIR:ShiShiGa-Workspace>/LICENSE"
+        "$<TARGET_FILE_DIR:ShiShiGa>/LICENSE"
     COMMENT "Copy LICENSE next to executable for development runs"
 )
 
-target_include_directories(ShiShiGa-Workspace PRIVATE
+target_include_directories(ShiShiGa PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_compile_definitions(ShiShiGa-Workspace PRIVATE
-    "SHISHIGA_APP_VERSION=\"${PROJECT_VERSION}\""
+target_compile_definitions(ShiShiGa PRIVATE
+    "SHISHIGA_APP_VERSION=\"${SHISHIGA_VERSION}\""
     "SHISHIGA_GIT_COMMIT=\"${SHISHIGA_GIT_COMMIT}\""
     "SHISHIGA_BUILD_DATE=\"${SHISHIGA_BUILD_DATE}\""
     "SHISHIGA_COMPILER_LABEL=\"${SHISHIGA_COMPILER_LABEL}\""
     "SHISHIGA_CMAKE_VERSION_LABEL=\"${SHISHIGA_CMAKE_VERSION_LABEL}\""
 )
 
-target_link_libraries(ShiShiGa-Workspace PRIVATE
+target_link_libraries(ShiShiGa PRIVATE
     Qt6::Concurrent
     Qt6::WebEngineWidgets
 )
 
 if(WIN32)
-    target_link_libraries(ShiShiGa-Workspace PRIVATE advapi32 dbghelp psapi)
+    target_link_libraries(ShiShiGa PRIVATE advapi32 dbghelp psapi)
 endif()
 
-qt_finalize_executable(ShiShiGa-Workspace)
+if(MSVC)
+    target_compile_options(ShiShiGa PRIVATE /utf-8)
+endif()
+
+qt_finalize_executable(ShiShiGa)
+
+option(SHISHIGA_BUILD_TESTS "Build page catalog regression tests" OFF)
+if(SHISHIGA_BUILD_TESTS)
+    enable_testing()
+    qt_add_executable(ServiceRegistryTest
+        tests/ServiceRegistryTest.cpp
+        src/services/ServiceRegistry.cpp
+        src/core/ServiceFaviconProvider.cpp
+        src/core/ServiceFaviconProvider.h)
+    target_include_directories(ServiceRegistryTest PRIVATE src)
+    target_link_libraries(ServiceRegistryTest PRIVATE Qt6::WebEngineWidgets)
+    if(MSVC)
+        target_compile_options(ServiceRegistryTest PRIVATE /utf-8)
+    endif()
+    add_test(NAME ServiceRegistryTest COMMAND ServiceRegistryTest)
+endif()

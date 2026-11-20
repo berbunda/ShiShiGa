@@ -1,4 +1,4 @@
-# Configure, build, and deploy ShiShiGa-Workspace with MSVC + Qt WebEngine.
+# Configure, build, and deploy ShiShiGa with MSVC + Qt WebEngine.
 $ErrorActionPreference = "Stop"
 
 function Move-DeployArtifactsToRuntime {
@@ -9,10 +9,18 @@ function Move-DeployArtifactsToRuntime {
     )
 
     $runtimeDir = Join-Path $DistDir $RuntimeDirName
+    $resolvedDist = [IO.Path]::GetFullPath($DistDir).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+    $resolvedRuntime = [IO.Path]::GetFullPath($runtimeDir)
+    if (-not $resolvedRuntime.StartsWith($resolvedDist, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Runtime directory must stay inside the portable release directory"
+    }
     New-Item -ItemType Directory -Path $runtimeDir -Force | Out-Null
 
     foreach ($dirName in @("resources", "qml", "translations")) {
         $source = Join-Path $DistDir $dirName
+        if (-not [IO.Path]::GetFullPath($source).StartsWith($resolvedDist, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Deployment source must stay inside the portable release directory"
+        }
         if (-not (Test-Path $source)) {
             continue
         }
@@ -95,7 +103,7 @@ function Deploy-QtRuntime {
 
 $ProjectRoot = $PSScriptRoot
 $BuildDir = Join-Path $ProjectRoot "build-msvc"
-$AppName = "ShiShiGa-Workspace"
+$AppName = "ShiShiGa"
 $ExecutableName = "$AppName.exe"
 # Real "<executable>.exe.local" directory: portable Windows DLL redirection,
 # no junctions/symlinks, survives archive extraction (see Deployment Rules).
@@ -110,7 +118,12 @@ if (-not (Test-Path $VcVars)) {
 
 Write-Host "Cleaning portable release directory..."
 if (Test-Path $DistDir) {
-    Remove-Item $DistDir -Recurse -Force
+    $resolvedProject = [IO.Path]::GetFullPath($ProjectRoot).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+    $resolvedRelease = (Resolve-Path -LiteralPath $DistDir).Path
+    if (-not $resolvedRelease.StartsWith($resolvedProject, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Portable release directory must stay inside the project"
+    }
+    Remove-Item -LiteralPath $resolvedRelease -Recurse -Force
 }
 New-Item -ItemType Directory -Path $DistDir -Force | Out-Null
 

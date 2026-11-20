@@ -79,7 +79,8 @@ void ServiceFaviconProvider::bindPage(const QString &serviceId, QWebEnginePage *
 
 void ServiceFaviconProvider::unbindPage(const QString &serviceId)
 {
-    m_pages.remove(serviceId);
+    if (auto *page = m_pages.take(serviceId))
+        disconnect(page, nullptr, this, nullptr);
 }
 
 void ServiceFaviconProvider::clearCacheForService(const QString &serviceId)

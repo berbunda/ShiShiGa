@@ -47,7 +47,7 @@ MainWindow::MainWindow(SettingsManager &settings, QWidget *parent)
     : QMainWindow(parent)
     , m_settings(settings)
 {
-    setWindowTitle(QStringLiteral("ShiShiga Workspace"));
+    setWindowTitle(QStringLiteral("ShiShiGa"));
     applyWindowIcon();
     setupMenu();
     applyWindowSettings();
@@ -164,7 +164,7 @@ void MainWindow::setupMenu()
     connect(devConsoleAction, &QAction::triggered, this, &MainWindow::openDevConsole);
 
     auto *helpMenu = menuBar()->addMenu(tr("Help"));
-    auto *aboutAction = helpMenu->addAction(tr("About ShiShiga-Workspace"));
+    auto *aboutAction = helpMenu->addAction(tr("About ShiShiGa"));
     auto *licenseAction = helpMenu->addAction(tr("GNU GPL v3 License"));
     connect(aboutAction, &QAction::triggered, this, &MainWindow::openAbout);
     connect(licenseAction, &QAction::triggered, this, &MainWindow::openLicense);

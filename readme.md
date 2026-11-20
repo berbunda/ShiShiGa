@@ -1,5 +1,5 @@
-# ShiShiga Workspace
-ShiShiga Workspace — desktop workspace для работы с AI-сервисами через web-интерфейс без использования API TOKENs.
+# ShiShiGa
+ShiShiGa — desktop workspace для работы с AI-сервисами через web-интерфейс без использования API TOKENs.
 
 ## Цель проекта | The purpose of the project
 Основная цель проекта — возможность использовать AI-сервисы в виде отдельной программы, не держа множество вкладок в браузере.  
@@ -53,7 +53,7 @@ A Linux version is planned, but work on it will begin only after the Windows ver
 - CMake 4.3.3
 
 ## Что реализовано
-- Открытие ChatGPT внутри Qt-приложения
+- Пользовательские страницы AI-сервисов с собственными названиями и URL
 - Сохранение состояния авторизации
 - Persistent Chromium/QWebEngine profiles
 - Хранение профилей в `%LOCALAPPDATA%`
@@ -87,3 +87,23 @@ Current status:
 The current kanban of the project is shown below.
 
 ![kanban](img/kanban.png)
+
+## Настройка страниц | Service pages
+
+Нажмите **+ → Add service page...**, введите название и полный адрес `https://...`.
+В **+ → Manage service pages...** можно редактировать, открывать и удалять страницы.
+Предустановленного списка нет. Страницы сохраняются между запусками; при запуске
+они остаются выгруженными до выбора. У каждой страницы отдельный постоянный профиль.
+Удаление страницы сохраняет данные её профиля на диске.
+Список хранится в `%LOCALAPPDATA%/ShiShiGa/services.json`.
+Существующие настройки прежней версии импортируются автоматически; существующий
+каталог `ShiShiga-Workspace/profiles` продолжает использоваться, если он уже есть.
+
+Use **+ → Add service page...** to enter a name and a full HTTP(S) URL.
+Use **+ → Manage service pages...** to edit, open or remove saved pages.
+No services are preinstalled. Saved pages are restored without loading WebEngine.
+Removing a page keeps its browser profile on disk.
+
+Версия программы задаётся в `[package].version` файла `Cargo.toml` (`x.y.z-b`)
+и считывается CMake; Rust для сборки не требуется. Переносимая сборка:
+`build-msvc/dist/ShiShiGa/ShiShiGa.exe` (скрипт `configure-msvc.ps1`).

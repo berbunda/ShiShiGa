@@ -5,7 +5,7 @@
 class AppMetadata
 {
 public:
-    static constexpr const char *kApplicationDisplayName = "ShiShiga-Workspace";
+    static constexpr const char *kApplicationDisplayName = "ShiShiGa";
     static constexpr const char *kGitHubRepositoryUrl =
         "https://github.com/berbunda/ShiShiGa-Workspace";
     static constexpr const char *kGplOfficialUrl =

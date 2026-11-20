@@ -104,6 +104,8 @@ void ProfileManagerWidget::connectSignals()
     if (m_serviceManager == nullptr)
         return;
 
+    connect(m_serviceManager, &ServiceManager::pagesChanged,
+            this, &ProfileManagerWidget::refreshProfileList);
     connect(m_serviceManager, &ServiceManager::serviceStateChanged,
             this, &ProfileManagerWidget::onServiceStateChanged);
     connect(m_serviceManager, &ServiceManager::serviceAdded,

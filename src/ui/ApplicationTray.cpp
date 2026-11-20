@@ -63,7 +63,7 @@ void ApplicationTray::setup()
     }
 
     m_trayIcon = new QSystemTrayIcon(icon, this);
-    m_trayIcon->setToolTip(QStringLiteral("ShiShiga Workspace"));
+    m_trayIcon->setToolTip(QStringLiteral("ShiShiGa"));
 
     m_contextMenu = new QMenu;
     m_toggleAction = m_contextMenu->addAction(QString());
@@ -91,8 +91,8 @@ void ApplicationTray::refreshToggleActionLabel()
 
     const bool visible = m_mainWindow.isVisible() && !m_mainWindow.isMinimized();
     m_toggleAction->setText(visible
-        ? tr("Hide ShiShiga Workspace")
-        : tr("Show ShiShiga Workspace"));
+        ? tr("Hide ShiShiGa")
+        : tr("Show ShiShiGa"));
 }
 
 void ApplicationTray::toggleMainWindowVisibility()

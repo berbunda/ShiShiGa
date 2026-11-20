@@ -35,11 +35,9 @@ void AboutWindow::setupUi()
     m_versionLabel->setText(
         QStringLiteral(
             "Version: %1<br>"
-            "Commit: %2<br>"
-            "Build date: %3<br>"
-            "Platform: %4")
+            "Build date: %2<br>"
+            "Platform: %3")
             .arg(AppMetadata::applicationVersion(),
-                 AppMetadata::gitCommit(),
                  AppMetadata::buildDate(),
                  AppMetadata::platformDescription()));
 

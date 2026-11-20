@@ -53,7 +53,10 @@ QList<ManagedProfileInfo> ProfileManager::registeredProfiles() const
 QString ProfileManager::profilesRoot() const
 {
     const QString localAppData = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-    return QDir(localAppData).filePath(QStringLiteral("ShiShiga-Workspace/profiles"));
+    const QString legacy = QDir(localAppData).filePath(QStringLiteral("ShiShiga-Workspace/profiles"));
+    if (QDir(legacy).exists())
+        return legacy;
+    return QDir(localAppData).filePath(QStringLiteral("ShiShiGa/profiles"));
 }
 
 QString ProfileManager::profileRootPath(const QString &profileId) const
@@ -159,11 +162,11 @@ bool ProfileManager::clearProfileData(const QString &profileId, QString *errorMe
 QString ProfileManager::normalizeServiceName(const QString &serviceName) const
 {
     const QString normalized = serviceName.trimmed().toLower();
-    static const QRegularExpression validPattern(QStringLiteral("^[a-z0-9]+$"));
+    static const QRegularExpression validPattern(QStringLiteral("^[a-z0-9_-]+$"));
 
     if (!validPattern.match(normalized).hasMatch()) {
         qCWarning(profileLog) << "Invalid service name:" << serviceName
-                              << "- expected lowercase alphanumeric identifier";
+                              << "- expected lowercase letters, digits, underscores or hyphens";
         return {};
     }
 

@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
     QApplication::setQuitOnLastWindowClosed(false);
-    QCoreApplication::setApplicationName(QStringLiteral("ShiShiga Workspace"));
+    QCoreApplication::setApplicationName(QStringLiteral("ShiShiGa"));
 
     SettingsManager &settings = SettingsManager::instance();
     settings.load();

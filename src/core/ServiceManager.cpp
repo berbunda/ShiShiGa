@@ -44,6 +44,58 @@ ServiceManager::ServiceManager(QStackedWidget *stackWidget, QObject *parent)
 
     connect(m_faviconProvider, &ServiceFaviconProvider::faviconChanged, this,
             &ServiceManager::serviceIconChanged);
+
+    // Restore configured pages without creating WebEngine views or profiles.
+    for (const auto &catalog : ServiceRegistry::catalog()) {
+        ServiceEntry entry;
+        entry.catalog = catalog;
+        entry.state = ServiceState::Unloaded;
+        entry.lastUrl = catalog.startUrl;
+        m_services.insert(catalog.id, std::move(entry));
+    }
+}
+
+bool ServiceManager::savePage(const ServiceCatalogEntry &page, QString *errorMessage)
+{
+    auto pages = ServiceRegistry::catalog();
+    bool replaced = false;
+    for (auto &existing : pages) {
+        if (existing.id == page.id) {
+            existing = page;
+            replaced = true;
+            break;
+        }
+    }
+    if (!replaced)
+        pages.append(page);
+    if (!ServiceRegistry::saveCatalog(pages, errorMessage))
+        return false;
+
+    const bool wasActive = m_activeServiceId == page.id;
+    closeService(page.id);
+    m_faviconProvider->clearCacheForService(page.id);
+    ServiceEntry entry;
+    entry.catalog = page;
+    entry.state = ServiceState::Unloaded;
+    entry.lastUrl = page.startUrl;
+    m_services.insert(page.id, std::move(entry));
+    emit serviceAdded(page.id);
+    emit pagesChanged();
+    if (wasActive)
+        activateService(page.id);
+    return true;
+}
+
+bool ServiceManager::removePage(const QString &serviceId, QString *errorMessage)
+{
+    auto pages = ServiceRegistry::catalog();
+    pages.removeIf([&serviceId](const auto &page) { return page.id == serviceId; });
+    if (!ServiceRegistry::saveCatalog(pages, errorMessage))
+        return false;
+    closeService(serviceId);
+    m_faviconProvider->clearCacheForService(serviceId);
+    emit pagesChanged();
+    return true;
 }
 
 QList<ServiceCatalogEntry> ServiceManager::openServices() const
@@ -232,6 +284,8 @@ void ServiceManager::closeService(const QString &serviceId)
     clearActiveServiceIfNeeded(serviceId);
 
     m_consoleLog->removeService(serviceId);
+    if (entry->inactivityTimer != nullptr)
+        entry->inactivityTimer->deleteLater();
     m_services.remove(serviceId);
     emit serviceRemoved(serviceId);
 }

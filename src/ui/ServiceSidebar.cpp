@@ -1,6 +1,7 @@
 #include "ServiceSidebar.h"
 
 #include "ServiceButton.h"
+#include "ServicePagesDialog.h"
 #include "SidebarAddButton.h"
 #include "core/ServiceManager.h"
 #include "core/SettingsManager.h"
@@ -99,8 +100,18 @@ void ServiceSidebar::showAddServiceMenu()
         });
     }
 
-    if (menu.isEmpty())
-        return;
+    if (!menu.isEmpty())
+        menu.addSeparator();
+    auto *addPage = menu.addAction(tr("Add service page..."));
+    connect(addPage, &QAction::triggered, this, [this] {
+        ServicePagesDialog dialog(m_serviceManager, this);
+        dialog.addPage();
+    });
+    auto *managePages = menu.addAction(tr("Manage service pages..."));
+    connect(managePages, &QAction::triggered, this, [this] {
+        ServicePagesDialog dialog(m_serviceManager, this);
+        dialog.exec();
+    });
 
     menu.exec(m_addButton->mapToGlobal(QPoint(0, m_addButton->height())));
 }

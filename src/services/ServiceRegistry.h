@@ -23,5 +23,7 @@ public:
     static QList<ServiceCatalogEntry> enabledServices();
     static ServiceCatalogEntry entryFor(const QString &serviceId);
     static bool isEnabled(const QString &serviceId);
+    static bool isValidPage(const ServiceCatalogEntry &entry);
+    static bool saveCatalog(const QList<ServiceCatalogEntry> &entries, QString *errorMessage = nullptr);
     static QIcon faviconFor(const ServiceCatalogEntry &entry, int logicalSize = 40);
 };

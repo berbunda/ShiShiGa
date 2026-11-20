@@ -65,7 +65,7 @@ DebugDiagnosticsSnapshot DiagnosticsInfo::collect(const ServiceManager *serviceM
     DebugDiagnosticsSnapshot snapshot;
 
     snapshot.application.applicationName = QCoreApplication::applicationName().isEmpty()
-        ? QStringLiteral("ShiShiga Workspace")
+        ? QStringLiteral("ShiShiGa")
         : QCoreApplication::applicationName();
     snapshot.application.applicationVersion = CrashLogger::instance().installedVersion().isEmpty()
         ? na()

@@ -85,14 +85,12 @@ QString AppMetadata::versionInfoClipboardText()
     return QStringLiteral(
                "%1\n"
                "Version: %2\n"
-               "Commit: %3\n"
-               "Build date: %4\n"
-               "Platform: %5\n"
-               "Qt: %6\n"
-               "GitHub: %7")
+               "Build date: %3\n"
+               "Platform: %4\n"
+               "Qt: %5\n"
+               "GitHub: %6")
         .arg(QString::fromLatin1(kApplicationDisplayName),
              applicationVersion(),
-             gitCommit(),
              buildDate(),
              platformDescription(),
              qtRuntimeVersion(),
